@@ -3,110 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Super Block Bros - 2.5D Multiplayer Platformer</title>
+    <title>Super Block Bros - 8-Bit Multiplayer</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { margin: 0; overflow: hidden; background-color: #87CEEB; font-family: 'Inter', sans-serif; user-select: none; }
-        #game-canvas { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; }
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;700&display=swap');
+        
+        body { margin: 0; overflow: hidden; background-color: #0f0c1b; font-family: 'Inter', sans-serif; user-select: none; color: white; }
+        #game-canvas { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; image-rendering: pixelated; }
         #ui-layer { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 10; pointer-events: none; }
         .interactive { pointer-events: auto; }
         
-        .retro-panel {
-            background: rgba(255, 255, 255, 0.95);
-            border: 4px solid #333;
-            box-shadow: 8px 8px 0px rgba(0,0,0,0.2);
-            border-radius: 8px;
+        /* Glassmorphism Dark/Wine Theme */
+        .glass-panel {
+            background: rgba(20, 15, 30, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            border-left: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            border-radius: 16px;
         }
 
         .btn-retro {
-            background-color: #4CAF50;
+            background: linear-gradient(135deg, #7c224e, #4a1532);
             color: white;
-            border: 3px solid #2E7D32;
-            border-radius: 6px;
+            border: 1px solid #a8326a;
+            border-radius: 8px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.8rem;
             text-transform: uppercase;
-            font-weight: bold;
-            transition: all 0.1s;
-            box-shadow: 0 4px 0 #2E7D32;
+            transition: all 0.2s;
+            box-shadow: 0 4px 0 #310c20, 0 5px 15px rgba(124, 34, 78, 0.4);
+            text-shadow: 1px 1px 0px #000;
         }
-        .btn-retro:active {
-            transform: translateY(4px);
-            box-shadow: 0 0 0 #2E7D32;
-        }
-        .btn-retro-blue { background-color: #2196F3; border-color: #1565C0; box-shadow: 0 4px 0 #1565C0; }
-        .btn-retro-blue:active { transform: translateY(4px); box-shadow: 0 0 0 #1565C0; }
+        .btn-retro:hover { background: linear-gradient(135deg, #962c60, #5c1c3f); transform: translateY(-2px); }
+        .btn-retro:active { transform: translateY(4px); box-shadow: 0 0 0 #310c20; }
+        
+        .btn-retro-blue { background: linear-gradient(135deg, #2d3748, #1a202c); border-color: #4a5568; box-shadow: 0 4px 0 #000; }
+        .btn-retro-blue:hover { background: linear-gradient(135deg, #4a5568, #2d3748); }
 
-        /* Loader */
-        .loader {
-            border: 4px solid #f3f3f3; border-top: 4px solid #3498db;
-            border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .pixel-text { font-family: 'Press Start 2P', cursive; }
+        .hud-text { font-family: 'Press Start 2P', cursive; font-size: 0.7rem; text-shadow: 2px 2px 0px #000; }
+
+        input { background: rgba(0,0,0,0.5); color: #e2e8f0; border: 2px solid rgba(124, 34, 78, 0.5); }
+        input:focus { border-color: #a8326a; outline: none; box-shadow: 0 0 10px rgba(124, 34, 78, 0.5); }
+
+        #countdown-display { font-size: 6rem; text-shadow: 4px 4px 0 #7c224e, 8px 8px 0 #000; display: none; }
     </style>
 </head>
 <body>
 
-    <!-- Contenedor del Juego 3D -->
-    <div id="game-canvas"></div>
+    <canvas id="game-canvas"></canvas>
 
-    <!-- Capa de Interfaz de Usuario -->
     <div id="ui-layer" class="flex items-center justify-center">
         
         <!-- Menú Principal -->
-        <div id="main-menu" class="retro-panel p-8 w-11/12 max-w-md text-center interactive flex flex-col items-center">
-            <h1 class="text-3xl font-black text-gray-800 mb-2 uppercase tracking-wide">Super Block Bros</h1>
-            <p class="text-sm text-gray-600 mb-6 font-medium">Carrera 2.5D Multijugador</p>
+        <div id="main-menu" class="glass-panel p-8 w-11/12 max-w-md text-center interactive flex flex-col items-center">
+            <h1 class="text-2xl pixel-text mb-4 text-pink-400">BLOCK BROS</h1>
+            <p class="text-sm text-gray-300 mb-6 font-medium">Multijugador 8-Bits</p>
             
-            <div id="loading-auth" class="flex flex-col items-center hidden mb-4">
-                <div class="loader mb-2"></div>
-                <p class="text-sm text-gray-500">Conectando al servidor...</p>
-            </div>
+            <div id="loading-auth" class="text-pink-300 animate-pulse font-mono text-sm hidden mb-4">Conectando al servidor...</div>
 
             <div id="menu-actions" class="w-full space-y-4">
-                <button id="btn-create-room" class="btn-retro w-full py-3 text-lg">Crear Nueva Sala</button>
-                <div class="relative flex py-2 items-center">
-                    <div class="flex-grow border-t border-gray-300"></div>
-                    <span class="flex-shrink-0 mx-4 text-gray-400 font-bold text-sm">O</span>
-                    <div class="flex-grow border-t border-gray-300"></div>
-                </div>
-                <input type="text" id="input-room-code" placeholder="Código de la Sala" class="w-full p-3 border-2 border-gray-300 rounded text-center text-xl font-mono uppercase focus:outline-none focus:border-blue-500">
-                <button id="btn-join-room" class="btn-retro btn-retro-blue w-full py-3 text-lg">Unirse a Sala</button>
-            </div>
-            
-            <div class="mt-6 text-xs text-gray-500 text-left bg-gray-100 p-3 rounded border border-gray-200">
-                <strong>Controles:</strong><br>
-                ⬅️ ➡️ o A / D para Moverse<br>
-                Espacio para Saltar (Mantenlo para saltar más alto)
+                <button id="btn-create-room" class="btn-retro w-full py-4">Crear Sala</button>
+                <div class="flex py-2 items-center"><div class="flex-grow border-t border-gray-700"></div><span class="mx-4 text-gray-500 font-bold text-sm">O</span><div class="flex-grow border-t border-gray-700"></div></div>
+                <input type="text" id="input-room-code" placeholder="CÓDIGO" class="w-full p-3 rounded text-center text-xl font-mono uppercase">
+                <button id="btn-join-room" class="btn-retro btn-retro-blue w-full py-4">Unirse</button>
             </div>
         </div>
 
-        <!-- HUD del Juego (Durante la partida) -->
-        <div id="game-hud" class="absolute top-4 left-4 retro-panel p-3 interactive hidden flex-col">
-            <div class="text-sm font-bold text-gray-700">Sala: <span id="hud-room-code" class="text-blue-600 font-mono">---</span></div>
-            <div class="text-xs text-gray-500 mt-1">El primero en tocar el cubo dorado GANA.</div>
+        <!-- Panel de Lobby (Sala de espera) -->
+        <div id="lobby-panel" class="absolute top-6 glass-panel p-4 interactive hidden flex-col items-center min-w-[300px]">
+            <h2 class="pixel-text text-pink-400 text-sm mb-2">SALA: <span id="lobby-room-code" class="text-white">---</span></h2>
+            <p id="lobby-status" class="text-xs text-gray-300 mb-4">Esperando jugadores...</p>
+            <div id="players-list" class="w-full flex gap-2 justify-center mb-4 flex-wrap"></div>
+            <button id="btn-start-game" class="btn-retro w-full py-3 hidden">Iniciar Partida</button>
+            <p id="wait-host-msg" class="text-xs text-gray-400 hidden">El anfitrión iniciará pronto...</p>
         </div>
 
-        <!-- Pantalla de Fin de Juego -->
-        <div id="game-over-screen" class="retro-panel p-8 w-11/12 max-w-sm text-center interactive hidden flex-col items-center">
-            <h2 id="end-title" class="text-4xl font-black mb-4 uppercase">¡Ganaste!</h2>
-            <p id="end-subtitle" class="text-gray-600 mb-6 font-medium">Has superado los obstáculos.</p>
-            <button id="btn-leave-room" class="btn-retro w-full py-3 text-lg">Volver al Menú</button>
+        <!-- HUD del Juego -->
+        <div id="game-hud" class="absolute top-4 left-4 interactive hidden flex-col">
+            <div class="hud-text text-pink-400">SALA: <span id="hud-room-code" class="text-white">---</span></div>
         </div>
 
+        <!-- Cuenta Regresiva Gigante -->
+        <div id="countdown-display" class="pixel-text text-white font-black animate-bounce absolute">3</div>
+
+        <!-- Fin de Juego -->
+        <div id="game-over-screen" class="glass-panel p-8 w-11/12 max-w-sm text-center interactive hidden flex-col items-center">
+            <h2 id="end-title" class="text-2xl pixel-text mb-4 text-yellow-400">¡FIN!</h2>
+            <p id="end-subtitle" class="text-gray-300 mb-6">Alguien ganó.</p>
+            <button id="btn-leave-room" class="btn-retro w-full py-4">Salir</button>
+        </div>
     </div>
 
-    <!-- Importar Three.js (Motor 3D) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-
-    <!-- Importar Firebase y Lógica Principal -->
+    <!-- Firebase SDKs -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, updateDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // ==========================================
-        // 1. CONFIGURACIÓN DE FIREBASE (OBLIGATORIO)
+        // 1. CONFIGURACIÓN FIREBASE (La tuya)
         // ==========================================
-        const appId = 'super-block-bros-default';
         const firebaseConfig = {
             apiKey: "AIzaSyCCG2VPH4-SHRwTOx2FzfNBpLojJl_V5k4",
             authDomain: "multiplayerserverma.firebaseapp.com",
@@ -120,530 +120,522 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
+        
         let currentUserId = null;
         let currentRoomId = null;
         let unsubscribeRoom = null;
         let isHost = false;
-        let myPlayerColor = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+        
+        // Paleta de colores para jugadores
+        const colors = ['#f43f5e', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4'];
+        let myColor = colors[Math.floor(Math.random() * colors.length)];
 
         // ==========================================
-        // 2. ELEMENTOS DEL DOM
+        // 2. MOTOR DE JUEGO (CANVAS 2D)
         // ==========================================
-        const menuEl = document.getElementById('main-menu');
-        const hudEl = document.getElementById('game-hud');
-        const gameOverEl = document.getElementById('game-over-screen');
-        const endTitle = document.getElementById('end-title');
-        const endSubtitle = document.getElementById('end-subtitle');
-        const hudRoomCode = document.getElementById('hud-room-code');
-        const inputRoomCode = document.getElementById('input-room-code');
-        
-        const btnCreate = document.getElementById('btn-create-room');
-        const btnJoin = document.getElementById('btn-join-room');
-        const btnLeave = document.getElementById('btn-leave-room');
-        const loadingAuth = document.getElementById('loading-auth');
-        const menuActions = document.getElementById('menu-actions');
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
 
-        // ==========================================
-        // 3. VARIABLES DE ESTADO DEL JUEGO
-        // ==========================================
-        let gameState = 'MENU'; // MENU, PLAYING, ENDED
-        let remotePlayers = {}; // { uid: { targetX, targetY, mesh, color } }
-        let lastSyncTime = 0;
+        // Variables de Estado
+        let gameState = 'MENU'; // MENU, LOBBY, COUNTDOWN, PLAYING, ENDED
+        let remotePlayers = {}; 
+        let mapBlocks = [];
+        let enemies = [];
+        let particles = [];
+        let goalBox = null;
+        let camera = { x: 0, y: 0, zoom: 1 };
         
-        // Físicas y Controles
-        const keys = { left: false, right: false, up: false, space: false };
-        const gravity = -0.015;
-        const moveSpeed = 0.15;
-        const initialJumpForce = 0.25;
-        const jumpHoldForce = 0.008; // Fuerza extra mientras se mantiene presionado
-        const maxJumpHoldFrames = 20; // Cuánto tiempo extra se puede potenciar el salto
+        const keys = { left: false, right: false, up: false };
+        let sendTimer = 0;
+
+        // Físicas Mejoradas
+        const GRAVITY = 0.6;
+        const FRICTION = 0.8;
+        const MOVE_SPEED = 1.2;
+        const MAX_SPEED_X = 6;
+        const JUMP_FORCE = -10;
+        const JUMP_HOLD = -0.6;
         
-        let playerState = {
-            x: 0, y: 0, vx: 0, vy: 0,
-            width: 1, height: 1,
-            onGround: false,
-            isJumping: false,
-            jumpHoldCounter: 0,
-            color: myPlayerColor
+        let player = {
+            x: 50, y: 0, vx: 0, vy: 0, w: 24, h: 24,
+            onGround: false, isJumping: false, jumpFrames: 0,
+            color: myColor, faceRight: true, walkTimer: 0,
+            squash: 1, stretch: 1 // Para animaciones de salto
         };
 
-        // Diseño del Nivel
-        const levelObjects = []; // Contenedor de colisiones estáticas
-        const levelEnemies = []; // Contenedor de enemigos patrullando
-        let goalBox = null;
-        const SPWAN_POINT = { x: 0, y: -1 };
-
-        // ==========================================
-        // 4. CONFIGURACIÓN DEL MOTOR 3D (THREE.JS)
-        // ==========================================
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x87CEEB); // Cielo azul
-        
-        // Cámara ortográfica o de perspectiva para 2.5D
-        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 5, 18);
-        camera.lookAt(0, 0, 0);
-
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.shadowMap.enabled = true;
-        document.getElementById('game-canvas').appendChild(renderer.domElement);
-
-        // Iluminación
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-        scene.add(ambientLight);
-        const dirLight = new THREE.DirectionalLight(0xffffff, 0.5);
-        dirLight.position.set(10, 20, 10);
-        dirLight.castShadow = true;
-        scene.add(dirLight);
-
-        // Jugador Local (Cubo)
-        const playerGeo = new THREE.BoxGeometry(playerState.width, playerState.height, playerState.width);
-        const playerMat = new THREE.MeshLambertMaterial({ color: myPlayerColor });
-        const playerMesh = new THREE.Mesh(playerGeo, playerMat);
-        playerMesh.castShadow = true;
-        scene.add(playerMesh);
-        playerMesh.position.set(SPWAN_POINT.x, SPWAN_POINT.y, 0);
-
-        // Constructor del Nivel
-        function createPlatform(x, y, w, h, color = 0x8B4513) {
-            const geo = new THREE.BoxGeometry(w, h, 2);
-            const mat = new THREE.MeshLambertMaterial({ color: color });
-            const mesh = new THREE.Mesh(geo, mat);
-            mesh.position.set(x, y, 0);
-            mesh.receiveShadow = true;
-            scene.add(mesh);
-            levelObjects.push({ x: x, y: y, w: w, h: h, mesh: mesh });
-        }
-
-        function createEnemy(x, y, minX, maxX, speed = 0.05) {
-            const geo = new THREE.BoxGeometry(1, 1, 1);
-            const mat = new THREE.MeshLambertMaterial({ color: 0xFF0000 }); // Rojo peligro
-            const mesh = new THREE.Mesh(geo, mat);
-            mesh.position.set(x, y, 0);
-            mesh.castShadow = true;
-            scene.add(mesh);
-            levelEnemies.push({ x, y, w: 0.9, h: 0.9, minX, maxX, speed, dir: 1, mesh });
-        }
-
-        function buildLevel() {
-            // Zona de inicio segura
-            createPlatform(0, -2, 10, 2, 0x4CAF50); // Verde
-            createPlatform(10, -3, 8, 2, 0x8B4513); // Caída leve
+        // Sistema de Audio 8-bit
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
             
-            // Primer salto con vacío
-            createPlatform(24, -3, 6, 2, 0x8B4513);
-            
-            // Enemigo básico
-            createEnemy(24, -1.5, 21.5, 26.5, 0.08);
-
-            // Saltos difíciles de 1 bloque
-            createPlatform(32, -1, 1, 1, 0x4CAF50);
-            createPlatform(36, 1, 1, 1, 0x4CAF50);
-            createPlatform(40, 3, 1, 1, 0x4CAF50);
-
-            // Plataforma larga con múltiples enemigos
-            createPlatform(52, 1, 15, 2, 0x8B4513);
-            createEnemy(48, 2.5, 45, 52, 0.1);
-            createEnemy(56, 2.5, 52, 59, 0.15);
-
-            // Zona Final
-            createPlatform(68, 1, 8, 2, 0x4CAF50);
-            
-            // Meta (Cubo Dorado)
-            const goalGeo = new THREE.BoxGeometry(2, 2, 2);
-            const goalMat = new THREE.MeshLambertMaterial({ color: 0xFFD700, emissive: 0x554400 });
-            goalBox = new THREE.Mesh(goalGeo, goalMat);
-            goalBox.position.set(70, 3, 0);
-            scene.add(goalBox);
-            goalBox.userData = { x: 70, y: 3, w: 2, h: 2 };
-            
-            // Estética de fondo
-            for(let i = 0; i < 20; i++) {
-                const bgGeo = new THREE.BoxGeometry(3, 3, 1);
-                const bgMat = new THREE.MeshLambertMaterial({ color: 0xFFFFFF, transparent: true, opacity: 0.3 });
-                const bgMesh = new THREE.Mesh(bgGeo, bgMat);
-                bgMesh.position.set(Math.random() * 80 - 10, Math.random() * 10, -5);
-                scene.add(bgMesh);
+            const now = audioCtx.currentTime;
+            if (type === 'jump') {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(150, now);
+                osc.frequency.exponentialRampToValueAtTime(400, now + 0.15);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.15);
+                osc.start(now); osc.stop(now + 0.15);
+            } else if (type === 'hit') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(100, now);
+                osc.frequency.exponentialRampToValueAtTime(20, now + 0.2);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.2);
+                osc.start(now); osc.stop(now + 0.2);
+            } else if (type === 'blip') {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(600, now);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                osc.start(now); osc.stop(now + 0.1);
+            } else if (type === 'go') {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(800, now);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                osc.start(now); osc.stop(now + 0.4);
             }
         }
-        buildLevel();
 
-        // ==========================================
-        // 5. LÓGICA DEL JUEGO (FÍSICAS Y ACTUALIZACIÓN)
-        // ==========================================
-        
-        // Chequeo de colisión AABB 2D adaptado para 3D (ignorando Z)
-        function checkCollision(objA, objB) {
-            return (
-                objA.x - objA.w/2 < objB.x + objB.w/2 &&
-                objA.x + objA.w/2 > objB.x - objB.w/2 &&
-                objA.y - objA.h/2 < objB.y + objB.h/2 &&
-                objA.y + objA.h/2 > objB.y - objB.h/2
-            );
+        function createParticles(x, y, color, amount = 8) {
+            for(let i=0; i<amount; i++) {
+                particles.push({
+                    x: x + 12, y: y + 24,
+                    vx: (Math.random() - 0.5) * 6,
+                    vy: (Math.random() - 1) * 6,
+                    life: 1.0, color: color
+                });
+            }
         }
 
-        function resetPlayer() {
-            playerState.x = SPWAN_POINT.x;
-            playerState.y = SPWAN_POINT.y;
-            playerState.vx = 0;
-            playerState.vy = 0;
+        // Diseño Nivel (Lobby)
+        function buildLobby() {
+            mapBlocks = [
+                { x: 0, y: 150, w: 400, h: 50, type: 'floor' },
+                { x: -50, y: -200, w: 50, h: 400, type: 'wall' },
+                { x: 400, y: -200, w: 50, h: 400, type: 'wall' }
+            ];
+            enemies = [];
+            goalBox = null;
+            player.x = 180; player.y = 50; player.vx = 0; player.vy = 0;
+        }
+
+        // Diseño Nivel (Aleatorio / Procedural)
+        function generateRandomMap() {
+            let layout = [];
+            let enems = [];
+            
+            // Inicio
+            layout.push({ x: 0, y: 200, w: 300, h: 200, type: 'floor' });
+            
+            let curX = 300;
+            let curY = 200;
+            
+            for(let i=0; i<15; i++) {
+                // Hueco aleatorio
+                curX += 60 + Math.random() * 80; 
+                // Altura aleatoria
+                curY += (Math.random() - 0.5) * 120;
+                let w = 100 + Math.random() * 200;
+                
+                layout.push({ x: curX, y: curY, w: w, h: 300, type: 'floor' });
+                
+                // Agregar Enemigo a veces
+                if (Math.random() > 0.4) {
+                    enems.push({ x: curX + 20, y: curY - 24, w: 24, h: 24, minX: curX, maxX: curX + w - 24, dir: 1 });
+                }
+                
+                // Bloque de salto difícil (1 bloque)
+                if (Math.random() > 0.7) {
+                    layout.push({ x: curX + w + 40, y: curY - 40, w: 30, h: 30, type: 'floor' });
+                    curX += 70;
+                }
+                
+                curX += w;
+            }
+            
+            // Meta
+            curX += 100;
+            layout.push({ x: curX, y: curY, w: 300, h: 200, type: 'floor' });
+            let goal = { x: curX + 100, y: curY - 60, w: 40, h: 40, type: 'goal' };
+            
+            return { layout, enems, goal };
+        }
+
+        function respawn() {
+            playSound('hit');
+            createParticles(player.x, player.y, player.color, 15);
+            player.x = 50; player.y = 0; 
+            player.vx = 0; player.vy = 0;
+            camera.x = 0; camera.y = 0;
+        }
+
+        // Lógica de Físicas y Colisiones Exactas (AABB Antibugs)
+        function checkCol(a, b) {
+            return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
         }
 
         function updatePhysics() {
-            if (gameState !== 'PLAYING') return;
+            if (gameState === 'MENU' || gameState === 'ENDED') return;
 
-            // --- MOVIMIENTO HORIZONTAL ---
-            if (keys.left || keys.a) playerState.vx = -moveSpeed;
-            else if (keys.right || keys.d) playerState.vx = moveSpeed;
-            else playerState.vx = 0;
+            // Controles
+            if (keys.left) { player.vx -= MOVE_SPEED; player.faceRight = false; }
+            if (keys.right) { player.vx += MOVE_SPEED; player.faceRight = true; }
+            
+            // Fricción y límite X
+            player.vx *= FRICTION;
+            if (player.vx > MAX_SPEED_X) player.vx = MAX_SPEED_X;
+            if (player.vx < -MAX_SPEED_X) player.vx = -MAX_SPEED_X;
+            
+            if (Math.abs(player.vx) > 0.5) player.walkTimer += 0.2;
+            else player.walkTimer = 0;
 
-            playerState.x += playerState.vx;
-
-            // Colisiones Horizontales
-            let playerBox = { x: playerState.x, y: playerState.y, w: playerState.width, h: playerState.height };
-            for (let p of levelObjects) {
-                if (checkCollision(playerBox, p)) {
-                    if (playerState.vx > 0) playerState.x = p.x - p.w/2 - playerState.width/2;
-                    if (playerState.vx < 0) playerState.x = p.x + p.w/2 + playerState.width/2;
-                    playerState.vx = 0;
-                    playerBox.x = playerState.x;
-                }
-            }
-
-            // --- SALTO Y GRAVEDAD ---
-            // Dinámica de salto variable (Mantener espacio presionado para saltar más)
-            if (keys.space || keys.up) {
-                if (playerState.onGround && !playerState.isJumping) {
-                    playerState.vy = initialJumpForce;
-                    playerState.isJumping = true;
-                    playerState.jumpHoldCounter = 0;
-                    playerState.onGround = false;
-                } else if (playerState.isJumping && playerState.jumpHoldCounter < maxJumpHoldFrames) {
-                    playerState.vy += jumpHoldForce; // Añadir fuerza prolongada
-                    playerState.jumpHoldCounter++;
-                } else {
-                    playerState.isJumping = false; // Se acabó el tiempo extra
+            // Salto prolongado (Mecánica)
+            if (keys.up) {
+                if (player.onGround) {
+                    player.vy = JUMP_FORCE;
+                    player.onGround = false;
+                    player.isJumping = true;
+                    player.jumpFrames = 0;
+                    player.squash = 0.5; player.stretch = 1.5; // Animación estirar
+                    playSound('jump');
+                    createParticles(player.x, player.y + 10, '#ffffff');
+                } else if (player.isJumping && player.jumpFrames < 15) {
+                    player.vy += JUMP_HOLD; // Salto más alto si mantienes presionado
+                    player.jumpFrames++;
                 }
             } else {
-                playerState.isJumping = false; // Soltó el botón, detener impulso extra
+                player.isJumping = false;
             }
 
-            playerState.vy += gravity; // Aplicar gravedad constante
-            
-            // Límite de velocidad de caída (Terminal velocity)
-            if (playerState.vy < -0.4) playerState.vy = -0.4;
-            
-            playerState.y += playerState.vy;
-            playerState.onGround = false;
-            playerBox.y = playerState.y;
+            player.vy += GRAVITY;
+            if (player.vy > 12) player.vy = 12; // Terminal velocity
 
-            // Colisiones Verticales
-            for (let p of levelObjects) {
-                if (checkCollision(playerBox, p)) {
-                    if (playerState.vy < 0) { // Cayendo
-                        playerState.y = p.y + p.h/2 + playerState.height/2;
-                        playerState.onGround = true;
-                        playerState.isJumping = false;
-                    } else if (playerState.vy > 0) { // Chocando cabeza
-                        playerState.y = p.y - p.h/2 - playerState.height/2;
-                        playerState.isJumping = false;
+            // Restaurar squash/stretch poco a poco
+            player.squash += (1 - player.squash) * 0.2;
+            player.stretch += (1 - player.stretch) * 0.2;
+
+            // --- RESOLUCIÓN COLISIONES (Eje Y) ---
+            player.y += player.vy;
+            player.onGround = false;
+            for (let b of mapBlocks) {
+                if (checkCol(player, b)) {
+                    if (player.vy > 0) { 
+                        player.y = b.y - player.h; 
+                        player.vy = 0; 
+                        if (!player.onGround) { player.squash = 1.4; player.stretch = 0.7; } // Aplastar al caer
+                        player.onGround = true; 
                     }
-                    playerState.vy = 0;
-                    playerBox.y = playerState.y;
+                    else if (player.vy < 0) { player.y = b.y + b.h; player.vy = 0; }
                 }
             }
 
-            // --- ACTUALIZAR ENEMIGOS ---
-            for (let e of levelEnemies) {
-                e.x += e.speed * e.dir;
+            // --- RESOLUCIÓN COLISIONES (Eje X) ---
+            player.x += player.vx;
+            for (let b of mapBlocks) {
+                if (checkCol(player, b)) {
+                    if (player.vx > 0) { player.x = b.x - player.w; player.vx = 0; }
+                    else if (player.vx < 0) { player.x = b.x + b.w; player.vx = 0; }
+                }
+            }
+
+            // Enemigos
+            for (let e of enemies) {
+                e.x += 2 * e.dir;
                 if (e.x > e.maxX) { e.x = e.maxX; e.dir = -1; }
                 if (e.x < e.minX) { e.x = e.minX; e.dir = 1; }
-                e.mesh.position.x = e.x;
-
-                // Colisión Jugador -> Enemigo (Muerte)
-                if (checkCollision(playerBox, e)) {
-                    resetPlayer();
-                }
+                
+                // Si tocamos enemigo -> Morir
+                if (checkCol(player, e) && gameState === 'PLAYING') respawn();
             }
 
-            // --- VACÍO (Muerte) ---
-            if (playerState.y < -15) {
-                resetPlayer();
-            }
+            // Caer al vacío
+            if (player.y > 1000 && gameState === 'PLAYING') respawn();
 
-            // --- META (Ganar) ---
-            if (goalBox && checkCollision(playerBox, goalBox.userData)) {
+            // Meta
+            if (gameState === 'PLAYING' && goalBox && checkCol(player, goalBox)) {
                 triggerWin(currentUserId);
             }
-
-            // Actualizar malla del jugador local
-            playerMesh.position.set(playerState.x, playerState.y, 0);
-
-            // Seguir con la cámara
-            camera.position.x += (playerState.x - camera.position.x) * 0.1;
-            camera.position.y += (Math.max(2, playerState.y + 4) - camera.position.y) * 0.1;
         }
 
-        // Bucle Principal de Renderizado
-        function animate() {
-            requestAnimationFrame(animate);
-            updatePhysics();
+        // Renderizado 8-bits
+        function drawSprite(ctx, x, y, w, h, color, faceRight, walkTimer, squash, stretch) {
+            ctx.save();
+            // Aplicar Transformaciones (Squash & Stretch)
+            ctx.translate(x + w/2, y + h);
+            ctx.scale(squash, stretch);
+            ctx.translate(-w/2, -h);
 
-            // Interpolar (Lerp) posiciones de jugadores remotos para suavidad de red
+            // Cuerpo principal pixelado
+            ctx.fillStyle = color;
+            ctx.fillRect(0, 0, w, h);
+            
+            // Ojos
+            ctx.fillStyle = 'white';
+            let eyeOffsetX = faceRight ? 12 : 4;
+            ctx.fillRect(eyeOffsetX, 4, 6, 6);
+            ctx.fillStyle = 'black';
+            ctx.fillRect(eyeOffsetX + (faceRight?2:0), 6, 4, 4);
+
+            // Piernas (Animación de caminar)
+            ctx.fillStyle = '#222';
+            let legOffset = Math.sin(walkTimer) * 4;
+            ctx.fillRect(4, h, 6, 4 + legOffset);
+            ctx.fillRect(w - 10, h, 6, 4 - legOffset);
+            
+            ctx.restore();
+        }
+
+        function render() {
+            // Fondo oscuro puro 8-bit
+            ctx.fillStyle = '#0f0c1b';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            if (gameState === 'MENU') return;
+
+            // Cámara Suave
+            let targetZoom = gameState === 'LOBBY' ? 0.6 : 1.2; // Alejar cámara en lobby
+            camera.zoom += (targetZoom - camera.zoom) * 0.05;
+            
+            let targetCamX = player.x - (canvas.width/2)/camera.zoom;
+            let targetCamY = player.y - (canvas.height/1.5)/camera.zoom;
+            camera.x += (targetCamX - camera.x) * 0.1;
+            camera.y += (targetCamY - camera.y) * 0.1;
+
+            ctx.save();
+            ctx.scale(camera.zoom, camera.zoom);
+            ctx.translate(-camera.x, -camera.y);
+
+            // Dibujar Mapa
+            for (let b of mapBlocks) {
+                if (b.x + b.w < camera.x || b.x > camera.x + canvas.width/camera.zoom) continue; // Culling
+                
+                ctx.fillStyle = '#1e1a33'; // Borde oscuro
+                ctx.fillRect(b.x, b.y, b.w, b.h);
+                ctx.fillStyle = '#2a224a'; // Centro vino/púrpura
+                ctx.fillRect(b.x+2, b.y+2, b.w-4, b.h-4);
+                // Patrón pixelado arriba
+                ctx.fillStyle = '#7c224e';
+                ctx.fillRect(b.x, b.y, b.w, 8);
+            }
+
+            // Meta
+            if (goalBox) {
+                ctx.fillStyle = '#eab308'; // Dorado
+                ctx.fillRect(goalBox.x, goalBox.y, goalBox.w, goalBox.h);
+                ctx.fillStyle = 'white';
+                ctx.fillText("META", goalBox.x, goalBox.y - 10);
+            }
+
+            // Enemigos (Rojos con dientes)
+            for (let e of enemies) {
+                ctx.fillStyle = '#e11d48';
+                ctx.fillRect(e.x, e.y, e.w, e.h);
+                ctx.fillStyle = 'black';
+                ctx.fillRect(e.x + 4, e.y + 4, 16, 4); // Visor enojado
+            }
+
+            // Jugadores Remotos
             for (let uid in remotePlayers) {
-                let rp = remotePlayers[uid];
-                if (rp.mesh) {
-                    rp.mesh.position.x += (rp.targetX - rp.mesh.position.x) * 0.2;
-                    rp.mesh.position.y += (rp.targetY - rp.mesh.position.y) * 0.2;
-                }
+                let p = remotePlayers[uid];
+                // Interpolar suave
+                p.renderX += (p.x - p.renderX) * 0.3;
+                p.renderY += (p.y - p.renderY) * 0.3;
+                drawSprite(ctx, p.renderX, p.renderY, 24, 24, p.color, p.x > p.renderX, p.x !== p.renderX ? performance.now()/100 : 0, 1, 1);
+                
+                // Nombre
+                ctx.fillStyle = 'white';
+                ctx.font = '8px "Press Start 2P"';
+                ctx.fillText(uid.substring(0,4), p.renderX - 4, p.renderY - 10);
             }
 
-            // Sincronizar con Firebase periódicamente si nos movimos y ha pasado tiempo
-            if (gameState === 'PLAYING' && currentRoomId) {
-                const now = Date.now();
-                if (now - lastSyncTime > 100) { // Enviar actualización max ~10 veces por segundo
-                    syncPositionToFirebase();
-                    lastSyncTime = now;
-                }
+            // Jugador Local
+            drawSprite(ctx, player.x, player.y, player.w, player.h, player.color, player.faceRight, player.walkTimer, player.squash, player.stretch);
+
+            // Partículas
+            for (let i = particles.length - 1; i >= 0; i--) {
+                let p = particles[i];
+                p.x += p.vx; p.y += p.vy;
+                p.life -= 0.05;
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = p.life;
+                ctx.fillRect(p.x, p.y, 4, 4);
+                ctx.globalAlpha = 1.0;
+                if (p.life <= 0) particles.splice(i, 1);
             }
 
-            renderer.render(scene, camera);
+            ctx.restore();
         }
 
-        // Eventos de teclado
+        function gameLoop() {
+            requestAnimationFrame(gameLoop);
+            updatePhysics();
+            render();
+
+            // Enviar datos red (15 veces por segundo, sin saturar)
+            if ((gameState === 'PLAYING' || gameState === 'LOBBY') && currentRoomId) {
+                if (performance.now() - sendTimer > 66) {
+                    syncPosition();
+                    sendTimer = performance.now();
+                }
+            }
+        }
+
+        // ==========================================
+        // 3. EVENTOS Y CONTROLES
+        // ==========================================
         window.addEventListener('keydown', (e) => {
-            if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = true;
-            if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = true;
-            if (e.code === 'ArrowUp' || e.code === 'KeyW') keys.up = true;
-            if (e.code === 'Space') keys.space = true;
+            if(e.key === 'ArrowLeft' || e.key === 'a') keys.left = true;
+            if(e.key === 'ArrowRight' || e.key === 'd') keys.right = true;
+            if(e.key === 'ArrowUp' || e.key === 'w' || e.key === ' ') keys.up = true;
         });
         window.addEventListener('keyup', (e) => {
-            if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = false;
-            if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = false;
-            if (e.code === 'ArrowUp' || e.code === 'KeyW') keys.up = false;
-            if (e.code === 'Space') keys.space = false;
+            if(e.key === 'ArrowLeft' || e.key === 'a') keys.left = false;
+            if(e.key === 'ArrowRight' || e.key === 'd') keys.right = false;
+            if(e.key === 'ArrowUp' || e.key === 'w' || e.key === ' ') keys.up = false;
         });
         window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
         });
 
         // ==========================================
-        // 6. LÓGICA DE FIREBASE (MULTIJUGADOR)
+        // 4. FIREBASE RED Y LÓGICA DE SALA
         // ==========================================
-
         async function initAuth() {
-            menuActions.classList.add('hidden');
-            loadingAuth.classList.remove('hidden');
-            
-            try {
-                // Priorizar token inyectado en el entorno
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (error) {
-                console.error("Auth error:", error);
-                alert("Error de autenticación. Intenta recargar.");
-            }
+            document.getElementById('menu-actions').classList.add('hidden');
+            document.getElementById('loading-auth').classList.remove('hidden');
+            try { await signInAnonymously(auth); } 
+            catch (error) { console.error(error); alert("Error de red."); }
         }
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUserId = user.uid;
-                loadingAuth.classList.add('hidden');
-                menuActions.classList.remove('hidden');
+                document.getElementById('loading-auth').classList.add('hidden');
+                document.getElementById('menu-actions').classList.remove('hidden');
             }
         });
 
-        function getRoomPath(roomId) {
-            // REGLA CRÍTICA DE RUTAS FIREBASE CUMPLIDA
-            return doc(db, 'artifacts', appId, 'public', 'data', 'rooms', roomId);
-        }
+        function getRoomRef(roomId) { return doc(db, 'rooms', roomId); }
 
         async function createRoom() {
             if (!currentUserId) return;
-            const newRoomId = Math.random().toString(36).substring(2, 8).toUpperCase();
-            const roomRef = getRoomPath(newRoomId);
+            const newRoomId = Math.random().toString(36).substring(2, 6).toUpperCase();
+            isHost = true;
             
-            try {
-                await setDoc(roomRef, {
-                    createdAt: Date.now(),
-                    status: 'playing',
-                    winner: null,
-                    players: {
-                        [currentUserId]: { x: playerState.x, y: playerState.y, color: playerState.color }
-                    }
-                });
-                
-                isHost = true;
-                joinRoomLogic(newRoomId);
-            } catch (err) {
-                console.error("Error creating room:", err);
-            }
+            await setDoc(getRoomRef(newRoomId), {
+                status: 'lobby', winner: null, mapData: null,
+                players: { [currentUserId]: { x: 0, y: 0, c: myColor } }
+            });
+            joinRoomProcess(newRoomId);
         }
 
-        async function joinRoomFromInput() {
-            const code = inputRoomCode.value.trim().toUpperCase();
-            if (!code || !currentUserId) return;
-            
-            const roomRef = getRoomPath(code);
-            const docSnap = await getDoc(roomRef);
-            
-            if (docSnap.exists() && docSnap.data().status === 'playing') {
-                isHost = false;
-                joinRoomLogic(code);
-            } else {
-                inputRoomCode.value = "";
-                inputRoomCode.placeholder = "¡SALA NO VÁLIDA!";
-                setTimeout(() => inputRoomCode.placeholder = "Código de la Sala", 2000);
-            }
+        async function joinRoom() {
+            const code = document.getElementById('input-room-code').value.trim().toUpperCase();
+            if (!code) return;
+            isHost = false;
+            joinRoomProcess(code);
         }
 
-        function joinRoomLogic(roomId) {
+        function joinRoomProcess(roomId) {
             currentRoomId = roomId;
-            gameState = 'PLAYING';
-            resetPlayer();
+            gameState = 'LOBBY';
+            buildLobby();
             
-            // UI
-            menuEl.classList.add('hidden');
-            hudEl.classList.remove('hidden');
-            hudEl.classList.add('flex');
-            hudRoomCode.textContent = roomId;
+            // Ocultar Main, Mostrar Lobby
+            document.getElementById('main-menu').classList.add('hidden');
+            document.getElementById('lobby-panel').classList.remove('hidden');
+            document.getElementById('lobby-panel').classList.add('flex');
+            document.getElementById('lobby-room-code').textContent = roomId;
+            
+            if(isHost) {
+                document.getElementById('btn-start-game').classList.remove('hidden');
+            } else {
+                document.getElementById('wait-host-msg').classList.remove('hidden');
+            }
 
-            // Escuchar cambios de la sala en tiempo real
-            const roomRef = getRoomPath(roomId);
-            unsubscribeRoom = onSnapshot(roomRef, (doc) => {
-                if (!doc.exists()) return;
-                const data = doc.data();
+            // Escuchar Firestore
+            unsubscribeRoom = onSnapshot(getRoomRef(roomId), (docSnap) => {
+                if (!docSnap.exists()) return;
+                const data = docSnap.data();
                 
-                // Manejar fin del juego
-                if (data.status === 'ended' && data.winner) {
-                    showGameOver(data.winner);
-                    return;
-                }
+                // Actualizar jugadores UI
+                const listUI = document.getElementById('players-list');
+                listUI.innerHTML = '';
+                let playerCount = 0;
 
-                // Sincronizar jugadores remotos
-                const serverPlayers = data.players || {};
-                
-                // Añadir/Actualizar remotos
-                for (let uid in serverPlayers) {
-                    if (uid === currentUserId) continue; // Ignorar a uno mismo
+                for (let uid in data.players) {
+                    playerCount++;
+                    const pData = data.players[uid];
                     
-                    const pData = serverPlayers[uid];
-                    if (!remotePlayers[uid]) {
-                        // Crear nuevo cubo remoto
-                        const geo = new THREE.BoxGeometry(1, 1, 1);
-                        const mat = new THREE.MeshLambertMaterial({ color: pData.color, transparent: true, opacity: 0.8 });
-                        const mesh = new THREE.Mesh(geo, mat);
-                        mesh.castShadow = true;
-                        scene.add(mesh);
-                        
-                        remotePlayers[uid] = { mesh: mesh, targetX: pData.x, targetY: pData.y };
-                        mesh.position.set(pData.x, pData.y, 0);
-                    } else {
-                        // Actualizar destino (Lerp lo suavizará en animate)
-                        remotePlayers[uid].targetX = pData.x;
-                        remotePlayers[uid].targetY = pData.y;
+                    // UI Círculo de color
+                    const pDot = document.createElement('div');
+                    pDot.className = "w-6 h-6 rounded-full border-2 border-white shadow-lg";
+                    pDot.style.backgroundColor = pData.c;
+                    listUI.appendChild(pDot);
+
+                    // Motor Remoto
+                    if (uid !== currentUserId) {
+                        if (!remotePlayers[uid]) remotePlayers[uid] = { renderX: pData.x, renderY: pData.y, x: pData.x, y: pData.y, color: pData.c };
+                        else {
+                            remotePlayers[uid].x = pData.x;
+                            remotePlayers[uid].y = pData.y;
+                        }
                     }
                 }
                 
+                document.getElementById('lobby-status').textContent = `${playerCount} Jugador(es) en sala`;
+
                 // Eliminar desconectados
-                for (let uid in remotePlayers) {
-                    if (!serverPlayers[uid]) {
-                        scene.remove(remotePlayers[uid].mesh);
-                        delete remotePlayers[uid];
-                    }
+                for (let uid in remotePlayers) { if(!data.players[uid]) delete remotePlayers[uid]; }
+
+                // Cambios de Estado
+                if (data.status === 'countdown' && gameState === 'LOBBY') {
+                    startCountdownMode(data.mapData);
                 }
-            }, (error) => {
-                console.error("Error en la sincronización:", error);
+                if (data.status === 'ended' && gameState === 'PLAYING') {
+                    showWinScreen(data.winner);
+                }
             });
         }
 
-        async function syncPositionToFirebase() {
-            if (!currentRoomId || !currentUserId) return;
-            const roomRef = getRoomPath(currentRoomId);
+        async function syncPosition() {
             try {
-                await updateDoc(roomRef, {
-                    [`players.${currentUserId}`]: {
-                        x: playerState.x,
-                        y: playerState.y,
-                        color: playerState.color
-                    }
+                await updateDoc(getRoomRef(currentRoomId), {
+                    [`players.${currentUserId}`]: { x: Math.round(player.x), y: Math.round(player.y), c: myColor }
                 });
-            } catch (err) {
-                // Silencioso para evitar saturar la consola en actualizaciones rápidas
-            }
+            } catch(e){}
         }
 
-        async function triggerWin(uid) {
-            if (gameState !== 'PLAYING') return;
-            gameState = 'ENDED';
+        // --- SISTEMA DE INICIO (Host) ---
+        document.getElementById('btn-start-game').addEventListener('click', async () => {
+            const mapData = generateRandomMap();
+            await updateDoc(getRoomRef(currentRoomId), { status: 'countdown', mapData: JSON.stringify(mapData) });
+        });
+
+        function startCountdownMode(mapDataStr) {
+            gameState = 'COUNTDOWN';
+            document.getElementById('lobby-panel').classList.add('hidden');
+            document.getElementById('lobby-panel').classList.remove('flex');
             
-            const roomRef = getRoomPath(currentRoomId);
-            try {
-                await updateDoc(roomRef, {
-                    status: 'ended',
-                    winner: uid
-                });
-            } catch (err) {
-                console.error("Error triggering win", err);
-            }
-        }
-
-        function showGameOver(winnerUid) {
-            gameState = 'ENDED';
-            hudEl.classList.add('hidden');
-            gameOverEl.classList.remove('hidden');
-            gameOverEl.classList.add('flex');
-
-            if (winnerUid === currentUserId) {
-                endTitle.textContent = "¡GANASTE!";
-                endTitle.className = "text-5xl font-black mb-4 uppercase text-green-600";
-                endSubtitle.textContent = "Llegaste primero al cubo dorado.";
-            } else {
-                endTitle.textContent = "¡PERDISTE!";
-                endTitle.className = "text-5xl font-black mb-4 uppercase text-red-600";
-                endSubtitle.textContent = "Alguien más llegó primero.";
-            }
-        }
-
-        function leaveRoom() {
-            if (unsubscribeRoom) {
-                unsubscribeRoom();
-                unsubscribeRoom = null;
-            }
-            currentRoomId = null;
-            gameState = 'MENU';
+            // Cargar mapa
+            const data = JSON.parse(mapDataStr);
+            mapBlocks = data.layout;
+            enemies = data.enems;
+            goalBox = data.goal;
             
-            // Limpiar remotos
-            for (let uid in remotePlayers) {
-                scene.remove(remotePlayers[uid].mesh);
-            }
-            remotePlayers = {};
+            player.x = 50; player.y = 0; player.vx = 0; player.vy = 0;
+            camera.zoom = 1.2;
 
-            // UI
-            gameOverEl.classList.add('hidden');
-            gameOverEl.classList.remove('flex');
-            menuEl.classList.remove('hidden');
-            inputRoomCode.value = "";
-        }
-
-        // ==========================================
-        // 7. INICIALIZACIÓN
-        // ==========================================
-        btnCreate.addEventListener('click', createRoom);
-        btnJoin.addEventListener('click', joinRoomFromInput);
-        btnLeave.addEventListener('click', leaveRoom);
-
-        window.onload = () => {
-            initAuth();
-            animate(); // Iniciar motor 3D
-        };
-
-    </script>
-</body>
-</html>
+            // Animación UI
+            const uiDisplay = document.getElementById('countdown-display');
+            uiDisplay.style.display = 'block';
+            let count = 3;
