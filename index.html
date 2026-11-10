@@ -105,7 +105,7 @@
         import { getFirestore, doc, setDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // ==========================================
-        // 1. CONFIGURACIÓN FIREBASE (La tuya)
+        // 1. CONFIGURACIÓN FIREBASE 
         // ==========================================
         const firebaseConfig = {
             apiKey: "AIzaSyCCG2VPH4-SHRwTOx2FzfNBpLojJl_V5k4",
@@ -126,7 +126,6 @@
         let unsubscribeRoom = null;
         let isHost = false;
         
-        // Paleta de colores para jugadores
         const colors = ['#f43f5e', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4'];
         let myColor = colors[Math.floor(Math.random() * colors.length)];
 
@@ -138,8 +137,7 @@
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
-        // Variables de Estado
-        let gameState = 'MENU'; // MENU, LOBBY, COUNTDOWN, PLAYING, ENDED
+        let gameState = 'MENU'; 
         let remotePlayers = {}; 
         let mapBlocks = [];
         let enemies = [];
@@ -150,7 +148,6 @@
         const keys = { left: false, right: false, up: false };
         let sendTimer = 0;
 
-        // Físicas Mejoradas
         const GRAVITY = 0.6;
         const FRICTION = 0.8;
         const MOVE_SPEED = 1.2;
@@ -162,10 +159,9 @@
             x: 50, y: 0, vx: 0, vy: 0, w: 24, h: 24,
             onGround: false, isJumping: false, jumpFrames: 0,
             color: myColor, faceRight: true, walkTimer: 0,
-            squash: 1, stretch: 1 // Para animaciones de salto
+            squash: 1, stretch: 1 
         };
 
-        // Sistema de Audio 8-bit
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         function playSound(type) {
             if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -215,7 +211,6 @@
             }
         }
 
-        // Diseño Nivel (Lobby)
         function buildLobby() {
             mapBlocks = [
                 { x: 0, y: 150, w: 400, h: 50, type: 'floor' },
@@ -227,41 +222,32 @@
             player.x = 180; player.y = 50; player.vx = 0; player.vy = 0;
         }
 
-        // Diseño Nivel (Aleatorio / Procedural)
         function generateRandomMap() {
             let layout = [];
             let enems = [];
-            
-            // Inicio
             layout.push({ x: 0, y: 200, w: 300, h: 200, type: 'floor' });
             
             let curX = 300;
             let curY = 200;
             
             for(let i=0; i<15; i++) {
-                // Hueco aleatorio
                 curX += 60 + Math.random() * 80; 
-                // Altura aleatoria
                 curY += (Math.random() - 0.5) * 120;
                 let w = 100 + Math.random() * 200;
                 
                 layout.push({ x: curX, y: curY, w: w, h: 300, type: 'floor' });
                 
-                // Agregar Enemigo a veces
                 if (Math.random() > 0.4) {
                     enems.push({ x: curX + 20, y: curY - 24, w: 24, h: 24, minX: curX, maxX: curX + w - 24, dir: 1 });
                 }
                 
-                // Bloque de salto difícil (1 bloque)
                 if (Math.random() > 0.7) {
                     layout.push({ x: curX + w + 40, y: curY - 40, w: 30, h: 30, type: 'floor' });
                     curX += 70;
                 }
-                
                 curX += w;
             }
             
-            // Meta
             curX += 100;
             layout.push({ x: curX, y: curY, w: 300, h: 200, type: 'floor' });
             let goal = { x: curX + 100, y: curY - 60, w: 40, h: 40, type: 'goal' };
@@ -277,7 +263,6 @@
             camera.x = 0; camera.y = 0;
         }
 
-        // Lógica de Físicas y Colisiones Exactas (AABB Antibugs)
         function checkCol(a, b) {
             return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
         }
@@ -285,11 +270,9 @@
         function updatePhysics() {
             if (gameState === 'MENU' || gameState === 'ENDED') return;
 
-            // Controles
             if (keys.left) { player.vx -= MOVE_SPEED; player.faceRight = false; }
             if (keys.right) { player.vx += MOVE_SPEED; player.faceRight = true; }
             
-            // Fricción y límite X
             player.vx *= FRICTION;
             if (player.vx > MAX_SPEED_X) player.vx = MAX_SPEED_X;
             if (player.vx < -MAX_SPEED_X) player.vx = -MAX_SPEED_X;
@@ -297,18 +280,17 @@
             if (Math.abs(player.vx) > 0.5) player.walkTimer += 0.2;
             else player.walkTimer = 0;
 
-            // Salto prolongado (Mecánica)
             if (keys.up) {
                 if (player.onGround) {
                     player.vy = JUMP_FORCE;
                     player.onGround = false;
                     player.isJumping = true;
                     player.jumpFrames = 0;
-                    player.squash = 0.5; player.stretch = 1.5; // Animación estirar
+                    player.squash = 0.5; player.stretch = 1.5; 
                     playSound('jump');
                     createParticles(player.x, player.y + 10, '#ffffff');
                 } else if (player.isJumping && player.jumpFrames < 15) {
-                    player.vy += JUMP_HOLD; // Salto más alto si mantienes presionado
+                    player.vy += JUMP_HOLD; 
                     player.jumpFrames++;
                 }
             } else {
@@ -316,13 +298,11 @@
             }
 
             player.vy += GRAVITY;
-            if (player.vy > 12) player.vy = 12; // Terminal velocity
+            if (player.vy > 12) player.vy = 12; 
 
-            // Restaurar squash/stretch poco a poco
             player.squash += (1 - player.squash) * 0.2;
             player.stretch += (1 - player.stretch) * 0.2;
 
-            // --- RESOLUCIÓN COLISIONES (Eje Y) ---
             player.y += player.vy;
             player.onGround = false;
             for (let b of mapBlocks) {
@@ -330,14 +310,13 @@
                     if (player.vy > 0) { 
                         player.y = b.y - player.h; 
                         player.vy = 0; 
-                        if (!player.onGround) { player.squash = 1.4; player.stretch = 0.7; } // Aplastar al caer
+                        if (!player.onGround) { player.squash = 1.4; player.stretch = 0.7; } 
                         player.onGround = true; 
                     }
                     else if (player.vy < 0) { player.y = b.y + b.h; player.vy = 0; }
                 }
             }
 
-            // --- RESOLUCIÓN COLISIONES (Eje X) ---
             player.x += player.vx;
             for (let b of mapBlocks) {
                 if (checkCol(player, b)) {
@@ -346,45 +325,35 @@
                 }
             }
 
-            // Enemigos
             for (let e of enemies) {
                 e.x += 2 * e.dir;
                 if (e.x > e.maxX) { e.x = e.maxX; e.dir = -1; }
                 if (e.x < e.minX) { e.x = e.minX; e.dir = 1; }
-                
-                // Si tocamos enemigo -> Morir
                 if (checkCol(player, e) && gameState === 'PLAYING') respawn();
             }
 
-            // Caer al vacío
             if (player.y > 1000 && gameState === 'PLAYING') respawn();
 
-            // Meta
             if (gameState === 'PLAYING' && goalBox && checkCol(player, goalBox)) {
                 triggerWin(currentUserId);
             }
         }
 
-        // Renderizado 8-bits
         function drawSprite(ctx, x, y, w, h, color, faceRight, walkTimer, squash, stretch) {
             ctx.save();
-            // Aplicar Transformaciones (Squash & Stretch)
             ctx.translate(x + w/2, y + h);
             ctx.scale(squash, stretch);
             ctx.translate(-w/2, -h);
 
-            // Cuerpo principal pixelado
             ctx.fillStyle = color;
             ctx.fillRect(0, 0, w, h);
             
-            // Ojos
             ctx.fillStyle = 'white';
             let eyeOffsetX = faceRight ? 12 : 4;
             ctx.fillRect(eyeOffsetX, 4, 6, 6);
             ctx.fillStyle = 'black';
             ctx.fillRect(eyeOffsetX + (faceRight?2:0), 6, 4, 4);
 
-            // Piernas (Animación de caminar)
             ctx.fillStyle = '#222';
             let legOffset = Math.sin(walkTimer) * 4;
             ctx.fillRect(4, h, 6, 4 + legOffset);
@@ -394,14 +363,12 @@
         }
 
         function render() {
-            // Fondo oscuro puro 8-bit
             ctx.fillStyle = '#0f0c1b';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             if (gameState === 'MENU') return;
 
-            // Cámara Suave
-            let targetZoom = gameState === 'LOBBY' ? 0.6 : 1.2; // Alejar cámara en lobby
+            let targetZoom = gameState === 'LOBBY' ? 0.6 : 1.2; 
             camera.zoom += (targetZoom - camera.zoom) * 0.05;
             
             let targetCamX = player.x - (canvas.width/2)/camera.zoom;
@@ -413,53 +380,43 @@
             ctx.scale(camera.zoom, camera.zoom);
             ctx.translate(-camera.x, -camera.y);
 
-            // Dibujar Mapa
             for (let b of mapBlocks) {
-                if (b.x + b.w < camera.x || b.x > camera.x + canvas.width/camera.zoom) continue; // Culling
-                
-                ctx.fillStyle = '#1e1a33'; // Borde oscuro
+                if (b.x + b.w < camera.x || b.x > camera.x + canvas.width/camera.zoom) continue; 
+                ctx.fillStyle = '#1e1a33'; 
                 ctx.fillRect(b.x, b.y, b.w, b.h);
-                ctx.fillStyle = '#2a224a'; // Centro vino/púrpura
+                ctx.fillStyle = '#2a224a'; 
                 ctx.fillRect(b.x+2, b.y+2, b.w-4, b.h-4);
-                // Patrón pixelado arriba
                 ctx.fillStyle = '#7c224e';
                 ctx.fillRect(b.x, b.y, b.w, 8);
             }
 
-            // Meta
             if (goalBox) {
-                ctx.fillStyle = '#eab308'; // Dorado
+                ctx.fillStyle = '#eab308'; 
                 ctx.fillRect(goalBox.x, goalBox.y, goalBox.w, goalBox.h);
                 ctx.fillStyle = 'white';
                 ctx.fillText("META", goalBox.x, goalBox.y - 10);
             }
 
-            // Enemigos (Rojos con dientes)
             for (let e of enemies) {
                 ctx.fillStyle = '#e11d48';
                 ctx.fillRect(e.x, e.y, e.w, e.h);
                 ctx.fillStyle = 'black';
-                ctx.fillRect(e.x + 4, e.y + 4, 16, 4); // Visor enojado
+                ctx.fillRect(e.x + 4, e.y + 4, 16, 4); 
             }
 
-            // Jugadores Remotos
             for (let uid in remotePlayers) {
                 let p = remotePlayers[uid];
-                // Interpolar suave
                 p.renderX += (p.x - p.renderX) * 0.3;
                 p.renderY += (p.y - p.renderY) * 0.3;
                 drawSprite(ctx, p.renderX, p.renderY, 24, 24, p.color, p.x > p.renderX, p.x !== p.renderX ? performance.now()/100 : 0, 1, 1);
                 
-                // Nombre
                 ctx.fillStyle = 'white';
                 ctx.font = '8px "Press Start 2P"';
                 ctx.fillText(uid.substring(0,4), p.renderX - 4, p.renderY - 10);
             }
 
-            // Jugador Local
             drawSprite(ctx, player.x, player.y, player.w, player.h, player.color, player.faceRight, player.walkTimer, player.squash, player.stretch);
 
-            // Partículas
             for (let i = particles.length - 1; i >= 0; i--) {
                 let p = particles[i];
                 p.x += p.vx; p.y += p.vy;
@@ -479,7 +436,6 @@
             updatePhysics();
             render();
 
-            // Enviar datos red (15 veces por segundo, sin saturar)
             if ((gameState === 'PLAYING' || gameState === 'LOBBY') && currentRoomId) {
                 if (performance.now() - sendTimer > 66) {
                     syncPosition();
@@ -488,9 +444,6 @@
             }
         }
 
-        // ==========================================
-        // 3. EVENTOS Y CONTROLES
-        // ==========================================
         window.addEventListener('keydown', (e) => {
             if(e.key === 'ArrowLeft' || e.key === 'a') keys.left = true;
             if(e.key === 'ArrowRight' || e.key === 'd') keys.right = true;
@@ -526,16 +479,31 @@
 
         function getRoomRef(roomId) { return doc(db, 'rooms', roomId); }
 
+        // AQUÍ ESTÁ EL CÓDIGO CON LAS ALERTAS
         async function createRoom() {
-            if (!currentUserId) return;
+            alert("1. Botón presionado...");
+            
+            if (!currentUserId) {
+                alert("Error: Firebase no te ha dado un ID de jugador. Revisa si activaste la Autenticación Anónima.");
+                return;
+            }
+            
+            alert("2. Tienes ID de jugador. Intentando guardar sala en la base de datos...");
             const newRoomId = Math.random().toString(36).substring(2, 6).toUpperCase();
             isHost = true;
             
-            await setDoc(getRoomRef(newRoomId), {
-                status: 'lobby', winner: null, mapData: null,
-                players: { [currentUserId]: { x: 0, y: 0, c: myColor } }
-            });
-            joinRoomProcess(newRoomId);
+            try {
+                await setDoc(getRoomRef(newRoomId), {
+                    status: 'lobby', winner: null, mapData: null,
+                    players: { [currentUserId]: { x: 0, y: 0, c: myColor } }
+                });
+                
+                alert("3. ¡Sala guardada con éxito! Entrando...");
+                joinRoomProcess(newRoomId);
+            } catch (error) {
+                alert("Error en la base de datos: " + error.message);
+                console.error("Error de Firestore:", error);
+            }
         }
 
         async function joinRoom() {
@@ -550,7 +518,6 @@
             gameState = 'LOBBY';
             buildLobby();
             
-            // Ocultar Main, Mostrar Lobby
             document.getElementById('main-menu').classList.add('hidden');
             document.getElementById('lobby-panel').classList.remove('hidden');
             document.getElementById('lobby-panel').classList.add('flex');
@@ -562,12 +529,10 @@
                 document.getElementById('wait-host-msg').classList.remove('hidden');
             }
 
-            // Escuchar Firestore
             unsubscribeRoom = onSnapshot(getRoomRef(roomId), (docSnap) => {
                 if (!docSnap.exists()) return;
                 const data = docSnap.data();
                 
-                // Actualizar jugadores UI
                 const listUI = document.getElementById('players-list');
                 listUI.innerHTML = '';
                 let playerCount = 0;
@@ -576,13 +541,11 @@
                     playerCount++;
                     const pData = data.players[uid];
                     
-                    // UI Círculo de color
                     const pDot = document.createElement('div');
                     pDot.className = "w-6 h-6 rounded-full border-2 border-white shadow-lg";
                     pDot.style.backgroundColor = pData.c;
                     listUI.appendChild(pDot);
 
-                    // Motor Remoto
                     if (uid !== currentUserId) {
                         if (!remotePlayers[uid]) remotePlayers[uid] = { renderX: pData.x, renderY: pData.y, x: pData.x, y: pData.y, color: pData.c };
                         else {
@@ -594,10 +557,8 @@
                 
                 document.getElementById('lobby-status').textContent = `${playerCount} Jugador(es) en sala`;
 
-                // Eliminar desconectados
                 for (let uid in remotePlayers) { if(!data.players[uid]) delete remotePlayers[uid]; }
 
-                // Cambios de Estado
                 if (data.status === 'countdown' && gameState === 'LOBBY') {
                     startCountdownMode(data.mapData);
                 }
@@ -615,7 +576,6 @@
             } catch(e){}
         }
 
-        // --- SISTEMA DE INICIO (Host) ---
         document.getElementById('btn-start-game').addEventListener('click', async () => {
             const mapData = generateRandomMap();
             await updateDoc(getRoomRef(currentRoomId), { status: 'countdown', mapData: JSON.stringify(mapData) });
@@ -626,7 +586,6 @@
             document.getElementById('lobby-panel').classList.add('hidden');
             document.getElementById('lobby-panel').classList.remove('flex');
             
-            // Cargar mapa
             const data = JSON.parse(mapDataStr);
             mapBlocks = data.layout;
             enemies = data.enems;
@@ -635,7 +594,72 @@
             player.x = 50; player.y = 0; player.vx = 0; player.vy = 0;
             camera.zoom = 1.2;
 
-            // Animación UI
             const uiDisplay = document.getElementById('countdown-display');
             uiDisplay.style.display = 'block';
             let count = 3;
+            playSound('blip');
+            uiDisplay.textContent = count;
+            
+            let interval = setInterval(() => {
+                count--;
+                if(count > 0) {
+                    playSound('blip');
+                    uiDisplay.textContent = count;
+                } else if(count === 0) {
+                    playSound('go');
+                    uiDisplay.textContent = "¡VAMOS!";
+                    uiDisplay.classList.add('text-green-400');
+                } else {
+                    clearInterval(interval);
+                    uiDisplay.style.display = 'none';
+                    uiDisplay.classList.remove('text-green-400');
+                    
+                    gameState = 'PLAYING';
+                    document.getElementById('game-hud').classList.remove('hidden');
+                    document.getElementById('game-hud').classList.add('flex');
+                    document.getElementById('hud-room-code').textContent = currentRoomId;
+                }
+            }, 1000);
+        }
+
+        async function triggerWin(uid) {
+            if (gameState !== 'PLAYING') return;
+            gameState = 'ENDED';
+            await updateDoc(getRoomRef(currentRoomId), { status: 'ended', winner: uid });
+        }
+
+        function showWinScreen(winnerUid) {
+            gameState = 'ENDED';
+            document.getElementById('game-hud').classList.add('hidden');
+            const goScreen = document.getElementById('game-over-screen');
+            goScreen.classList.remove('hidden');
+            goScreen.classList.add('flex');
+
+            if (winnerUid === currentUserId) {
+                document.getElementById('end-title').textContent = "¡GANASTE!";
+                playSound('jump'); setTimeout(()=>playSound('jump'), 150);
+            } else {
+                document.getElementById('end-title').textContent = "PERDISTE";
+                document.getElementById('end-title').classList.replace('text-yellow-400', 'text-red-500');
+                playSound('hit');
+            }
+        }
+
+        document.getElementById('btn-leave-room').addEventListener('click', () => {
+            if(unsubscribeRoom) unsubscribeRoom();
+            currentRoomId = null; remotePlayers = {};
+            document.getElementById('game-over-screen').classList.add('hidden');
+            document.getElementById('main-menu').classList.remove('hidden');
+            gameState = 'MENU';
+        });
+
+        document.getElementById('btn-create-room').addEventListener('click', createRoom);
+        document.getElementById('btn-join-room').addEventListener('click', joinRoom);
+
+        window.onload = () => {
+            initAuth();
+            gameLoop();
+        };
+    </script>
+</body>
+</html>
